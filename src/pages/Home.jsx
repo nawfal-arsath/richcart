@@ -214,13 +214,13 @@ export default function Home() {
 
           <div className="footer-col">
             <h4 className="footer-col-title">Follow Us</h4>
-            <a href="https://instagram.com/richcart" target="_blank" rel="noopener noreferrer" className="insta-link">
+            <a href="https://instagram.com/richmobiles_" target="_blank" rel="noopener noreferrer" className="insta-link">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
                 <circle cx="12" cy="12" r="4"/>
                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
               </svg>
-              @richcart
+              @richmobiles_
             </a>
           </div>
         </div>

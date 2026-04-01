@@ -2,13 +2,20 @@ const CATEGORIES = ['All', 'Mobile', 'Laptop', 'Tablet', 'Case', 'Accessories','
 
 export default function CategoryFilter({ active, onChange }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', justifyContent: 'start', gap: '10px', margin: '24px 0' }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+        gap: '10px',
+        margin: '24px 0'
+      }}
+    >
       {CATEGORIES.map(cat => (
         <button
           key={cat}
           onClick={() => onChange(cat)}
           style={{
-            padding: '8px 20px',
+            padding: '8px 12px',
             borderRadius: '50px',
             border: active === cat ? 'none' : '1px solid #e8e8e8',
             background: active === cat ? '#1a1a2e' : '#fff',
@@ -16,7 +23,8 @@ export default function CategoryFilter({ active, onChange }) {
             fontSize: '13px',
             fontWeight: 500,
             cursor: 'pointer',
-            transition: 'all 0.2s'
+            transition: 'all 0.2s',
+            width: '100%'
           }}
         >
           {cat}

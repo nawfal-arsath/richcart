@@ -245,7 +245,7 @@ export default function Home() {
         /* ── Banner ── */
         .banner-section {
           width: 100%;
-          background: #000;
+          background: #fff;
         }
 
         .banner-slide {
@@ -266,6 +266,7 @@ export default function Home() {
           height: 100%;
           object-fit: cover;
           object-position: center;
+          background: #fff;
         }
 
         .banner-overlay {
@@ -273,9 +274,9 @@ export default function Home() {
           inset: 0;
           background: linear-gradient(
             to top,
-            rgba(0,0,0,0.75) 0%,
-            rgba(0,0,0,0.25) 50%,
-            rgba(0,0,0,0.05) 100%
+            rgba(0,0,0,0.55) 0%,
+            rgba(0,0,0,0.1) 50%,
+            rgba(0,0,0,0) 100%
           );
           z-index: 1;
         }

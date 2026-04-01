@@ -13,9 +13,9 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState('All')
 
   const banners = [
-    { id: 1, title: 'iPhone 17 Pro',      img: '/banners/1.png' },
+    { id: 1, title: 'iPhone 17 Pro',      img: '/banners/1.jpg' },
     { id: 2, title: 'Samsung Galaxy S25', img: '/banners/2.jpg'   },
-    { id: 3, title: 'iphone 17 air',        img: '/banners/3.png'    },
+    { id: 3, title: 'iphone 17 air',        img: '/banners/3.jpg'    },
   ]
 
   useEffect(() => {

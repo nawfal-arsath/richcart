@@ -174,7 +174,7 @@ export default function Navbar() {
               Products
             </Link>
             <a
-              href="https://wa.me/919894980387"
+              href="https://wa.me/7010228720"
               target="_blank"
               rel="noreferrer"
               style={{

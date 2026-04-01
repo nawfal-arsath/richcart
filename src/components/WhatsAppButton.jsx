@@ -1,6 +1,6 @@
 export default function WhatsAppButton({ productName, price }) {
   const message = `Hi! I'm interested in *${productName}* priced at ₹${Number(price).toLocaleString('en-IN')}. Is it available?`
-  const url = `https://wa.me/919894980387?text=${encodeURIComponent(message)}`
+  const url = `https://wa.me/7010228720?text=${encodeURIComponent(message)}`
 
   return (
     <a

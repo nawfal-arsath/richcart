@@ -2,7 +2,7 @@ const CATEGORIES = ['All', 'Mobile', 'Laptop', 'Tablet', 'Case', 'Accessories','
 
 export default function CategoryFilter({ active, onChange }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', justifyContent: 'start', gap: '10px', margin: '24px 0' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, auto)', justifyContent: 'start', gap: '10px', margin: '24px 0' }}>
       {CATEGORIES.map(cat => (
         <button
           key={cat}

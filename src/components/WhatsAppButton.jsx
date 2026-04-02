@@ -17,7 +17,7 @@ export default function WhatsAppButton({ productName, price }) {
         padding: '16px 32px',
         borderRadius: '12px',
         fontSize: '16px',
-        fontWeight: 600,
+        fontWeight: 500,
         textDecoration: 'none',
         transition: 'all 0.2s',
         width: '100%',

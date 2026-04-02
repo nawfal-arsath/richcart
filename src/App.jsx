@@ -8,6 +8,8 @@ import AddProduct from './admin/AddProduct'
 import ManageProducts from './admin/ManageProducts'
 import ProtectedRoute from './admin/ProtectedRoute'
 import EditProduct from './admin/EditProduct'
+import Checkout from './pages/Checkout'
+import PaymentSuccess from './pages/PaymentSuccess'
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/checkout/:id" element={<Checkout />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin/add" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
         <Route path="/admin/manage" element={<ProtectedRoute><ManageProducts /></ProtectedRoute>} />

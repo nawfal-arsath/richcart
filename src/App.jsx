@@ -7,6 +7,7 @@ import Dashboard from './admin/Dashboard'
 import AddProduct from './admin/AddProduct'
 import ManageProducts from './admin/ManageProducts'
 import ProtectedRoute from './admin/ProtectedRoute'
+import EditProduct from './admin/EditProduct'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin/add" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
         <Route path="/admin/manage" element={<ProtectedRoute><ManageProducts /></ProtectedRoute>} />
+        <Route path="/admin/edit/:id" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   )

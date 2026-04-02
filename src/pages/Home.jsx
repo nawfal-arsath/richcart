@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { collection, getDocs, query, orderBy } from 'firebase/firestore'
 import { db } from '../firebase'
 import Navbar from '../components/Navbar'
@@ -11,11 +11,14 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0)
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const navigate = useNavigate()
 
   const banners = [
-    { id: 1, title: 'iPhone 17 Pro',      img: '/banners/1.jpg' },
-    { id: 2, title: 'Samsung Galaxy S25', img: '/banners/2.jpg'   },
-    { id: 3, title: 'iphone 17 air',        img: '/banners/3.jpg'    },
+    { id: 1, title: 'iPhone 17 Pro', img: '/banners/1.jpg' },
+    { id: 2, title: 'Exclusive Toys', img: '/banners/2.jpg' },
+    { id: 3, title: 'The Footwear Atelier', img: '/banners/3.jpg' },
+    { id: 4, title: 'Premium Watches', img: '/banners/4.jpg' },
+    { id: 5, title: 'Samsung S25 Ultra', img: '/banners/5.jpg' },
   ]
 
   useEffect(() => {
@@ -49,9 +52,14 @@ export default function Home() {
   const nextBanner = () => setCurrentBannerIndex(prev => (prev + 1) % banners.length)
   const prevBanner = () => setCurrentBannerIndex(prev => (prev - 1 + banners.length) % banners.length)
 
+  const handleSearch = (searchTerm) => {
+    // Navigate to products page with search query
+    navigate(`/products?search=${encodeURIComponent(searchTerm)}`)
+  }
+
   return (
     <div className="page-root">
-      <Navbar />
+      <Navbar onSearch={handleSearch} />
 
       {/* ── Hero Banner Carousel ── */}
       <section className="banner-section">
@@ -185,7 +193,7 @@ export default function Home() {
             <ul className="footer-list">
               <li>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.21 3.53 2 2 0 0 1 3.18 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.29 6.29l1.28-1.28a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.21 3.53A2 2 0 0 1 3.18 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.96a16 16 0 0 0 6.29 6.29l1.28-1.28a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
                 </svg>
                 +91 70102 28720
               </li>

@@ -1,87 +1,134 @@
-import { useState } from 'react'
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
+import { useState, useEffect } from 'react'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Link } from 'react-router-dom'
-
+import { Link, useParams, useNavigate } from 'react-router-dom'
 
 const CATEGORIES = ['All', 'Mobile', 'Toys', 'Footwear', 'Accessories', 'Watches', 'Others']
 
 const CLOUDINARY_CLOUD_NAME = 'dknpv11pw'
 const CLOUDINARY_UPLOAD_PRESET = 'richcart_preset'
 
-export default function AddProduct() {
+export default function EditProduct() {
+  const { id } = useParams()
+  const navigate = useNavigate()
+
   const [form, setForm] = useState({
     name: '', category: 'Mobile',
     actualPrice: '', sellingPrice: '', description: ''
   })
-  const [image, setImage] = useState(null)
+  const [existingImageUrl, setExistingImageUrl] = useState(null)
+  const [existingPublicId, setExistingPublicId] = useState(null)
+  const [newImage, setNewImage] = useState(null)
   const [preview, setPreview] = useState(null)
   const [progress, setProgress] = useState(0)
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [fetching, setFetching] = useState(true)
 
-  // Auto-calculate discount %
   const discountPercent = form.actualPrice && form.sellingPrice
     ? Math.round(((form.actualPrice - form.sellingPrice) / form.actualPrice) * 100)
     : 0
 
+  // Load existing product data
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const snap = await getDoc(doc(db, 'products', id))
+        if (!snap.exists()) {
+          alert('Product not found.')
+          navigate('/admin/manage')
+          return
+        }
+        const data = snap.data()
+        setForm({
+          name: data.name || '',
+          category: data.category || 'Mobile',
+          actualPrice: data.actualPrice || '',
+          sellingPrice: data.sellingPrice || '',
+          description: data.description || ''
+        })
+        setExistingImageUrl(data.imageUrl || null)
+        setExistingPublicId(data.imagePublicId || null)
+        setPreview(data.imageUrl || null)
+      } catch (err) {
+        console.error(err)
+        alert('Failed to load product.')
+      } finally {
+        setFetching(false)
+      }
+    }
+    fetchProduct()
+  }, [id, navigate])
+
   const handleImage = (e) => {
     const file = e.target.files[0]
     if (!file) return
-    setImage(file)
+    setNewImage(file)
     setPreview(URL.createObjectURL(file))
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!image) return alert('Please select an image')
     if (Number(form.sellingPrice) > Number(form.actualPrice)) {
       return alert('Selling price cannot be more than actual price')
     }
     setUploading(true)
     setError('')
-    setProgress(30)
+    setProgress(20)
 
     try {
-      const formData = new FormData()
-      formData.append('file', image)
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+      let imageUrl = existingImageUrl
+      let imagePublicId = existingPublicId
 
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: formData }
-      )
+      // Upload new image if selected
+      if (newImage) {
+        // Delete old image from Cloudinary
+        if (existingPublicId) {
+          await fetch('/api/delete-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ publicId: existingPublicId })
+          })
+        }
 
-      setProgress(70)
-      const data = await res.json()
-      if (!data.secure_url) throw new Error('Upload failed')
-      setProgress(90)
+        const formData = new FormData()
+        formData.append('file', newImage)
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
 
-      await addDoc(collection(db, 'products'), {
+        setProgress(40)
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          { method: 'POST', body: formData }
+        )
+        const data = await res.json()
+        if (!data.secure_url) throw new Error('Image upload failed')
+
+        imageUrl = data.secure_url
+        imagePublicId = data.public_id
+      }
+
+      setProgress(75)
+
+      await updateDoc(doc(db, 'products', id), {
         name: form.name,
         category: form.category,
         description: form.description,
         actualPrice: Number(form.actualPrice),
         sellingPrice: Number(form.sellingPrice),
         discountPercent: discountPercent > 0 ? discountPercent : null,
-        imageUrl: data.secure_url,
-        imagePublicId: data.public_id,
-        sold: false,
-        createdAt: serverTimestamp()
+        imageUrl,
+        imagePublicId,
       })
 
       setProgress(100)
       setUploading(false)
       setSuccess(true)
-      setForm({ name: '', category: 'Mobile', actualPrice: '', sellingPrice: '', description: '' })
-      setImage(null)
-      setPreview(null)
-      setTimeout(() => { setSuccess(false); setProgress(0) }, 3000)
+      setTimeout(() => navigate('/admin/manage'), 2000)
 
     } catch (err) {
       console.error(err)
-      setError('Upload failed. Check your Cloudinary config.')
+      setError('Update failed. Please try again.')
       setUploading(false)
       setProgress(0)
     }
@@ -89,9 +136,18 @@ export default function AddProduct() {
 
   const inputStyle = {
     width: '100%', padding: '10px 14px', border: '1px solid #e8e8e8',
-    borderRadius: '8px', fontSize: '14px', outline: 'none', marginTop: '6px'
+    borderRadius: '8px', fontSize: '14px', outline: 'none', marginTop: '6px',
+    boxSizing: 'border-box'
   }
   const labelStyle = { fontSize: '13px', fontWeight: 500, color: '#555', display: 'block' }
+
+  if (fetching) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#f9f9f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#aaa', fontSize: '14px' }}>Loading product...</p>
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9f9f9' }}>
@@ -100,8 +156,8 @@ export default function AddProduct() {
         display: 'flex', alignItems: 'center', gap: '16px',
         boxShadow: '0 2px 12px rgba(0,0,0,0.05)'
       }}>
-        <Link to="/admin/dashboard" style={{ fontSize: '13px', color: '#e94560', fontWeight: 600 }}>← Back</Link>
-        <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e' }}>Add New Product</span>
+        <Link to="/admin/manage" style={{ fontSize: '13px', color: '#e94560', fontWeight: 600 }}>← Back</Link>
+        <span style={{ fontSize: '18px', fontWeight: 700, color: '#1a1a2e' }}>Edit Product</span>
       </div>
 
       <div style={{ maxWidth: '600px', margin: '40px auto', padding: '0 24px' }}>
@@ -122,7 +178,12 @@ export default function AddProduct() {
                 onMouseLeave={e => e.currentTarget.style.borderColor = '#e8e8e8'}
               >
                 {preview
-                  ? <img src={preview} alt="preview" style={{ maxHeight: '200px', maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                  ? (
+                    <div>
+                      <img src={preview} alt="preview" style={{ maxHeight: '200px', maxWidth: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                      <p style={{ color: '#aaa', fontSize: '12px', marginTop: '8px' }}>Click to change image</p>
+                    </div>
+                  )
                   : (
                     <div>
                       <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '4px' }}>Click to upload image</p>
@@ -146,7 +207,6 @@ export default function AddProduct() {
               </select>
             </div>
 
-            {/* Pricing section */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
               <div>
                 <label style={labelStyle}>Actual Price (₹)</label>
@@ -168,7 +228,6 @@ export default function AddProduct() {
               </div>
             </div>
 
-            {/* Live discount preview */}
             {discountPercent > 0 && (
               <div style={{
                 background: '#e8f8ed', borderRadius: '8px',
@@ -190,14 +249,14 @@ export default function AddProduct() {
                   <div style={{ background: '#e94560', height: '100%', width: `${progress}%`, transition: 'width 0.4s ease' }} />
                 </div>
                 <p style={{ fontSize: '12px', color: '#888', marginTop: '6px' }}>
-                  {progress < 70 ? 'Uploading image...' : progress < 100 ? 'Saving product...' : 'Done!'}
+                  {progress < 70 ? 'Uploading image...' : progress < 100 ? 'Saving changes...' : 'Done!'}
                 </p>
               </div>
             )}
 
             {success && (
               <div style={{ background: '#e8f8ed', color: '#1a7a42', padding: '12px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', fontWeight: 500 }}>
-                ✓ Product added successfully!
+                ✓ Product updated successfully! Redirecting...
               </div>
             )}
 
@@ -210,9 +269,9 @@ export default function AddProduct() {
             <button type="submit" disabled={uploading} style={{
               width: '100%', background: uploading ? '#aaa' : '#1a1a2e',
               color: '#fff', padding: '12px', borderRadius: '8px',
-              border: 'none', fontSize: '14px', fontWeight: 600
+              border: 'none', fontSize: '14px', fontWeight: 600, cursor: uploading ? 'not-allowed' : 'pointer'
             }}>
-              {uploading ? `Uploading... ${progress}%` : 'Add Product'}
+              {uploading ? `Saving... ${progress}%` : 'Save Changes'}
             </button>
           </form>
         </div>

@@ -1,8 +1,19 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 
-export default function Navbar() {
+export default function Navbar({ onSearch }) {
   const [open, setOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchTerm.trim() && onSearch) {
+      onSearch(searchTerm.trim())
+      setSearchOpen(false)
+      setSearchTerm('')
+    }
+  }
 
   return (
     <>
@@ -67,6 +78,31 @@ export default function Navbar() {
           >
             Products
           </Link>
+          
+          {/* Search Icon - Desktop */}
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '8px',
+              cursor: 'pointer',
+              color: '#374151',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '8px',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+
           <a
             href="https://wa.me/7010228720"
             target="_blank"
@@ -95,28 +131,111 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setOpen(!open)}
-          style={{
-            display: 'none',
-            background: 'transparent',
-            border: 'none',
-            padding: '8px',
-            cursor: 'pointer',
-            color: '#111827'
-          }}
-          className="mobile-menu-btn"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            {open ? (
-              <path d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path d="M3 12h18M3 6h18M3 18h18" />
-            )}
-          </svg>
-        </button>
+        {/* Mobile - Search and Menu Icons */}
+        <div style={{ display: 'none', gap: '8px', alignItems: 'center' }} className="mobile-icons">
+          <button
+            onClick={() => setSearchOpen(!searchOpen)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '8px',
+              cursor: 'pointer',
+              color: '#111827',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </button>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setOpen(!open)}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              padding: '8px',
+              cursor: 'pointer',
+              color: '#111827'
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {open ? (
+                <path d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path d="M3 12h18M3 6h18M3 18h18" />
+              )}
+            </svg>
+          </button>
+        </div>
       </nav>
+
+      {/* Search Bar Dropdown */}
+      {searchOpen && (
+        <div style={{
+          position: 'fixed',
+          top: '72px',
+          left: 0,
+          right: 0,
+          background: '#ffffff',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '16px 20px',
+          zIndex: 999,
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          animation: 'slideDown 0.2s ease-out'
+        }}>
+          <form onSubmit={handleSearchSubmit} style={{ maxWidth: '600px', margin: '0 auto', position: 'relative' }}>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search products..."
+              autoFocus
+              style={{
+                width: '100%',
+                padding: '12px 48px 12px 16px',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                fontSize: '15px',
+                fontFamily: '"Poppins", sans-serif',
+                outline: 'none',
+                transition: 'border-color 0.2s'
+              }}
+              onFocus={(e) => e.currentTarget.style.borderColor = '#111827'}
+              onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+            />
+            <button
+              type="submit"
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: '#111827',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                cursor: 'pointer',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#1f2937'}
+              onMouseLeave={(e) => e.currentTarget.style.background = '#111827'}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Mobile Menu */}
       {open && (
@@ -206,13 +325,13 @@ export default function Navbar() {
           .desktop-nav {
             display: flex !important;
           }
-          .mobile-menu-btn {
+          .mobile-icons {
             display: none !important;
           }
         }
         @media (max-width: 767px) {
-          .mobile-menu-btn {
-            display: block !important;
+          .mobile-icons {
+            display: flex !important;
           }
         }
         @keyframes fadeIn {

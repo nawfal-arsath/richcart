@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { collection, getDocs, deleteDoc, doc, updateDoc, orderBy, query } from 'firebase/firestore'
+import { collection, getDocs, deleteDoc, doc, orderBy, query } from 'firebase/firestore'
 import { db } from '../firebase'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 export default function ManageProducts() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const navigate = useNavigate()
 
   const fetchProducts = async () => {
     const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'))
@@ -19,33 +20,26 @@ export default function ManageProducts() {
   useEffect(() => { fetchProducts() }, [])
 
   const handleDelete = async (product) => {
-  setDeletingId(product.id)
+    setDeletingId(product.id)
 
-  try {
-    if (product.imagePublicId) {
-      await fetch('/api/delete-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicId: product.imagePublicId })
-      })
+    try {
+      if (product.imagePublicId) {
+        await fetch('/api/delete-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ publicId: product.imagePublicId })
+        })
+      }
+
+      await deleteDoc(doc(db, 'products', product.id))
+      setProducts(prev => prev.filter(p => p.id !== product.id))
+
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong while deleting. Try again.')
+    } finally {
+      setDeletingId(null)
     }
-
-    await deleteDoc(doc(db, 'products', product.id))
-
-    setProducts(prev => prev.filter(p => p.id !== product.id))
-
-  } catch (err) {
-    console.error(err)
-    alert('Something went wrong while deleting. Try again.')
-  } finally {
-    setDeletingId(null)
-  }
-}
- 
-
-  const toggleSold = async (id, current) => {
-    await updateDoc(doc(db, 'products', id), { sold: !current })
-    fetchProducts()
   }
 
   return (
@@ -90,19 +84,20 @@ export default function ManageProducts() {
               </p>
             </div>
 
+            {/* Edit Button */}
             <button
-              onClick={() => toggleSold(p.id, p.sold)}
+              onClick={() => navigate(`/admin/edit/${p.id}`)}
               style={{
-                padding: '6px 14px', borderRadius: '6px', border: '1px solid',
+                padding: '6px 14px', borderRadius: '6px', border: '1px solid #b8d4f8',
                 fontSize: '12px', fontWeight: 600, cursor: 'pointer', flexShrink: 0,
-                background: p.sold ? '#ffeaea' : '#e8f8ed',
-                color: p.sold ? '#e94560' : '#1a7a42',
-                borderColor: p.sold ? '#f5bec8' : '#b8e8c8'
+                background: '#eaf2ff',
+                color: '#1a5ec4',
               }}
             >
-              {p.sold ? 'Mark Available' : 'Mark Sold'}
+              Edit
             </button>
 
+            {/* Delete Button */}
             <button
               onClick={() => {
                 if (confirmDeleteId === p.id) {
@@ -110,11 +105,7 @@ export default function ManageProducts() {
                   setConfirmDeleteId(null)
                 } else {
                   setConfirmDeleteId(p.id)
-
-                  // Auto reset after 3 seconds (important UX)
-                  setTimeout(() => {
-                    setConfirmDeleteId(null)
-                  }, 3000)
+                  setTimeout(() => setConfirmDeleteId(null), 3000)
                 }
               }}
               disabled={deletingId === p.id}

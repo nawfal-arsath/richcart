@@ -1,4 +1,4 @@
-const CATEGORIES = ['All', 'Mobile', 'Laptop', 'Tablet', 'Case', 'Accessories','AC', 'Others']
+const CATEGORIES = ['All', 'Mobile', 'Toys', 'Footwear', 'Accessories', 'Watches', 'Others']
 
 export default function CategoryFilter({ active, onChange }) {
   return (

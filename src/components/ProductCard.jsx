@@ -75,48 +75,42 @@ export default function ProductCard({ product }) {
           )}
         </div>
 
-        <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column' }}>
           <span style={{
-            fontSize: '11px', fontWeight: 600, color: '#6b7280',
-            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px'
+            fontSize: '10px', fontWeight: 600, color: '#6b7280',
+            textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px'
           }}>
             {product.category}
           </span>
           <h3 style={{
-            fontSize: '17px', fontWeight: 600, color: '#111827',
-            margin: '0 0 10px', lineHeight: 1.3, letterSpacing: '-0.01em'
+            fontSize: '15px', fontWeight: 600, color: '#111827',
+            margin: '0 0 8px', lineHeight: 1.3, letterSpacing: '-0.01em'
           }}>
             {product.name}
           </h3>
-          <p style={{
-            fontSize: '14px', color: '#6b7280',
-            marginBottom: '16px', lineHeight: 1.5, flex: 1
-          }}>
-            {product.description?.slice(0, 80)}...
-          </p>
 
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            paddingTop: '12px', borderTop: '1px solid #f3f4f6'
+            paddingTop: '8px', borderTop: '1px solid #f3f4f6'
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {/* Selling price */}
               <span style={{
-                fontSize: '20px', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em'
+                fontSize: '17px', fontWeight: 700, color: '#111827', letterSpacing: '-0.02em'
               }}>
                 ₹{Number(product.sellingPrice || product.price).toLocaleString('en-IN')}
               </span>
               {/* Actual price struck through */}
               {hasDiscount && (
                 <span style={{
-                  fontSize: '13px', color: '#9ca3af',
+                  fontSize: '12px', color: '#9ca3af',
                   textDecoration: 'line-through', fontWeight: 400
                 }}>
                   ₹{Number(product.actualPrice).toLocaleString('en-IN')}
                 </span>
               )}
             </div>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </div>

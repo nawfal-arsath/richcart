@@ -1,19 +1,45 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, limit, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import Navbar from '../components/Navbar'
 import WhatsAppButton from '../components/WhatsAppButton'
+import ProductCard from '../components/ProductCard'
 
 export default function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
+  const [relatedProducts, setRelatedProducts] = useState([])
+  const [loadingRelated, setLoadingRelated] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
     const fetchProduct = async () => {
       const snap = await getDoc(doc(db, 'products', id))
-      if (snap.exists()) setProduct({ id: snap.id, ...snap.data() })
+      if (snap.exists()) {
+        const productData = { id: snap.id, ...snap.data() }
+        setProduct(productData)
+        
+        // Fetch related products from the same category
+        if (productData.category) {
+          try {
+            const q = query(
+              collection(db, 'products'),
+              where('category', '==', productData.category),
+              limit(5)
+            )
+            const relatedSnap = await getDocs(q)
+            const related = relatedSnap.docs
+              .map(d => ({ id: d.id, ...d.data() }))
+              .filter(p => p.id !== id) // Exclude current product
+              .slice(0, 4) // Limit to 4 products
+            setRelatedProducts(related)
+          } catch (error) {
+            console.error('Error fetching related products:', error)
+          }
+        }
+        setLoadingRelated(false)
+      }
     }
     fetchProduct()
   }, [id])
@@ -65,7 +91,7 @@ export default function ProductDetail() {
         <div className="detail-grid" style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px',
           background: '#ffffff', borderRadius: '20px',
-          border: '1px solid #e5e7eb', padding: '32px', marginBottom: '40px'
+          border: '1px solid #e5e7eb', padding: '32px', marginBottom: '60px'
         }}>
           {/* Image */}
           <div style={{
@@ -164,9 +190,74 @@ export default function ProductDetail() {
             )}
           </div>
         </div>
+
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <section style={{ marginBottom: '60px' }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px'
+            }}>
+              <h2 style={{
+                fontSize: '24px',
+                fontWeight: 800,
+                color: '#111827',
+                letterSpacing: '-0.01em',
+                margin: 0
+              }}>
+                Related Products
+              </h2>
+              <Link
+                to="/products"
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  color: '#6b7280',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#111827'}
+                onMouseLeave={e => e.currentTarget.style.color = '#6b7280'}
+              >
+                SEE ALL →
+              </Link>
+            </div>
+
+            {loadingRelated ? (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                padding: '40px'
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid #f3f4f6',
+                  borderTopColor: '#111827',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+              </div>
+            ) : (
+              <div className="related-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                gap: '12px'
+              }}>
+                {relatedProducts.map(p => (
+                  <ProductCard key={p.id} product={p} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
 
       <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
         @media (max-width: 768px) {
           .detail-grid {
             grid-template-columns: 1fr !important;
@@ -174,6 +265,11 @@ export default function ProductDetail() {
             padding: 24px !important;
           }
           .detail-grid h1 { font-size: 28px !important; }
+          
+          .related-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 10px !important;
+          }
         }
       `}</style>
     </div>

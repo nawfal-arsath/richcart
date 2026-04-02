@@ -45,7 +45,7 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBannerIndex(prev => (prev + 1) % banners.length)
-    }, 5000)
+    }, 2500) // Changed from 5000 to 2500 (2.5 seconds)
     return () => clearInterval(interval)
   }, [])
 
@@ -53,7 +53,6 @@ export default function Home() {
   const prevBanner = () => setCurrentBannerIndex(prev => (prev - 1 + banners.length) % banners.length)
 
   const handleSearch = (searchTerm) => {
-    // Navigate to products page with search query
     navigate(`/products?search=${encodeURIComponent(searchTerm)}`)
   }
 
@@ -117,7 +116,7 @@ export default function Home() {
             <Link to="/products" className="see-all">SEE ALL →</Link>
           </div>
 
-          <CategoryFilter active={selectedCategory} onChange={setSelectedCategory} />
+          <CategoryFilter active={selectedCategory} onChange={setSelectedCategory} maxCategories={4} />
 
           {loading ? (
             <div className="spinner-wrap">
@@ -375,21 +374,12 @@ export default function Home() {
 
         .products-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-          gap: 16px;
+          grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+          gap: 12px;
         }
 
         .product-card-wrap {
           position: relative;
-          background: #fff;
-          border-radius: 12px;
-          overflow: hidden;
-          border: 1px solid #f3f4f6;
-          transition: transform 0.25s, box-shadow 0.25s;
-        }
-        .product-card-wrap:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 8px 20px rgba(0,0,0,0.08);
         }
 
         .discount-badge {
@@ -434,6 +424,10 @@ export default function Home() {
         /* ── Responsive ── */
         @media (max-width: 640px) {
            .banner-bg-img { object-position: center top; }
+           .products-grid {
+             grid-template-columns: repeat(2, 1fr);
+             gap: 10px;
+           }
         }
         @media (max-width: 900px) {
           .features-grid { grid-template-columns: 1fr 1fr; }
@@ -450,7 +444,6 @@ export default function Home() {
           .dots { bottom: 16px; right: 16px; }
           .features-grid { grid-template-columns: 1fr; }
           .footer-grid { grid-template-columns: 1fr; gap: 28px; }
-          .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
           .section-title { font-size: 17px; }
         }
       `}</style>
